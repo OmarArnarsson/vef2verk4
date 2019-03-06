@@ -8,11 +8,6 @@ const {
   deleteId,
 } = require('./todos');
 
-async function listRoute(req, res) {
-  const items = await list();
-
-  return res.json(items);
-}
 
 async function makeAssignment(req, res) {
   const { title, due, position } = req.body;
@@ -76,7 +71,7 @@ function catchErrors(fn) {
   return (req, res, next) => fn(req, res, next).catch(next);
 }
 
-router.get('/', catchErrors(listRoute));
+router.get('/', catchErrors(list));
 router.post('/', catchErrors(makeAssignment));
 router.get('/:id', catchErrors(getAssignment));
 router.patch('/:id', catchErrors(updateAssignment));

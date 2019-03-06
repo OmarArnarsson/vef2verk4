@@ -2,11 +2,25 @@ const xss = require('xss');
 const validator = require('validator');
 const { query } = require('./db');
 
-async function list() {
-  const result = await query('SELECT * FROM assignments');
+async function list(req, res) {
+  let result = '';
+  const desc = req.query.order === 'desc';
+  const skipun = desc ? 'position DESC' : 'position ASC';
 
-  return result.rows;
+  const { completed } = req.query;
+  if (typeof completed !== 'undefined') {
+    if (completed === 'true' || completed === 'false') {
+      result = await query(`SELECT * FROM assignments WHERE completed = ${completed} ORDER BY ${skipun}`);
+      return res.json(result.rows);
+    }
+  } else {
+    result = await query(`SELECT * FROM assignments ORDER BY ${skipun}`);
+    return res.json(result.rows);
+  }
+
+  return res.status(404).json({ error: 'Illegal query request' });
 }
+
 
 function isEmpty(s) {
   return s == null && !s;
