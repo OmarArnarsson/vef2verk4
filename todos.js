@@ -2,6 +2,12 @@ const xss = require('xss');
 const validator = require('validator');
 const { query } = require('./db');
 
+/**
+ * Býr til lista af verkefnum, hægt er að setja inn query string gildi
+ * til að hafa áhrif á hvernig verkefni eru birt.
+ * @param {*} req 
+ * @param {*} res 
+ */
 async function list(req, res) {
   let result = '';
   const desc = req.query.order === 'desc';
@@ -21,11 +27,22 @@ async function list(req, res) {
   return res.status(404).json({ error: 'Illegal query request' });
 }
 
-
+/**
+ * Segir okkur hvort s sé breyta eða null 
+ * @param {*} s - breyta af hvaða tagi sem er
+ */
 function isEmpty(s) {
   return s == null && !s;
 }
 
+/**
+ * Validate athugar hvort breytur séu af réttu tagi og löglegar fyrir
+ * gagnagrunn.
+ * @param {string} title - Strengur með titli
+ * @param {date} due - dateobject með dagsetningu eða null
+ * @param {int} position - heiltala um staðsetningu í lista
+ * @param {boolean} completed - boolean um hvort verkefni sé klárað
+ */
 function validate(title, due, position, completed) {
   const errors = [];
 
@@ -68,6 +85,10 @@ function validate(title, due, position, completed) {
   return errors;
 }
 
+/**
+ * Post býr yil nýja færslu í gagnagrunn
+ * @param {object} json - Hlutur sem á að búa til og setja í gagnagrunn
+ */
 async function post({ title, due, position } = {}) {
   const validationResult = validate(title, due, position);
 
@@ -94,6 +115,11 @@ async function post({ title, due, position } = {}) {
   };
 }
 
+/**
+ * Breytir Json object útfrá gefnum gildum
+ * @param {int} id - Auðkenni
+ * @param {obejct} json - Hlutur sem inniheldur breytur
+ */
 async function patch(id, { title, due, position, completed }) {
   const validationResult = validate(title, due, position, completed);
 
@@ -121,6 +147,10 @@ async function patch(id, { title, due, position, completed }) {
   };
 }
 
+/**
+ * Sækir færslu í gagnagrunn útfrá gefnu auðkenni.
+ * @param {int} id - auðkenni
+ */
 async function getId(id) {
   const skipun = 'SELECT * FROM assignments WHERE id = $1';
 
@@ -129,6 +159,10 @@ async function getId(id) {
   return result.rows;
 }
 
+/**
+ * Eyðir færslu í gagnagrunn útfŕa gefnu auðkenni
+ * @param {int} id - auðkenni
+ */
 async function deleteId(id) {
   const skipun = 'DELETE FROM assignments WHERE id = $1';
 
@@ -136,6 +170,7 @@ async function deleteId(id) {
 
   return result.rowCount === 1;
 }
+
 module.exports = {
   list,
   patch,
